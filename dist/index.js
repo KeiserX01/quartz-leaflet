@@ -556,7 +556,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 .leaflet-control-layers-toggle {
   background-color: #E8DCC2 !important;
-  background-image: url(layers-icon.svg) !important;
+  background-image: url(static/layers-icon.svg) !important;
   background-size: 26px 26px;
   background-repeat: no-repeat;
   background-position: center;
