@@ -628,19 +628,22 @@ async function initialiseMap(
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
-    L.imageOverlay(dataset.src, bounds).addTo(mapItem);
+    const baseLayer = L.imageOverlay(dataset.src, bounds).addTo(mapItem);
 
-    // Process layers
+    // Process layers and create layer control
+    const overlays: Record<string, import("leaflet").Layer> = {};
     try {
         const rawLayers = dataset.layers;
         if (rawLayers && rawLayers !== "[]") {
             const parsedLayers: string[] = JSON.parse(rawLayers);
             if (Array.isArray(parsedLayers)) {
-                const layerGroup = L.layerGroup().addTo(mapItem);
-                for (const layerUrl of parsedLayers) {
+                for (let i = 0; i < parsedLayers.length; i++) {
+                    const layerUrl = parsedLayers[i];
                     if (typeof layerUrl === "string" && layerUrl.trim().length > 0) {
                         try {
-                            L.imageOverlay(layerUrl, bounds).addTo(layerGroup);
+                            const overlay = L.imageOverlay(layerUrl, bounds);
+                            overlays[`Layer ${i + 1}`] = overlay;
+                            overlay.addTo(mapItem);
                         } catch (e) {
                             console.error("[leaflet-map] Failed to add layer:", layerUrl, e);
                         }
@@ -650,6 +653,10 @@ async function initialiseMap(
         }
     } catch (e) {
         console.error("[leaflet-map] Failed to parse layers:", dataset.layers, e);
+    }
+
+    if (Object.keys(overlays).length > 0) {
+        L.control.layers({ "Base map": baseLayer }, overlays).addTo(mapItem);
     }
 
     mapItem.fitBounds(bounds);
