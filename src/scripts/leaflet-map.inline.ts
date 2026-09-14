@@ -628,22 +628,30 @@ async function initialiseMap(
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
-    const baseLayer = L.imageOverlay(dataset.src, bounds).addTo(mapItem);
+    function getLayerName(url: string): string {
+        try {
+            const path = url.split("/").pop() || url;
+            const name = path.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+            return name.trim() || url;
+        } catch {
+            return url;
+        }
+    }
 
-    // Process layers and create layer control
-    const overlays: Record<string, import("leaflet").Layer> = {};
+    const baseLayers: Record<string, import("leaflet").Layer> = {};
+    const imageName = getLayerName(dataset.src);
+    baseLayers[imageName] = L.imageOverlay(dataset.src, bounds).addTo(mapItem);
+
     try {
         const rawLayers = dataset.layers;
         if (rawLayers && rawLayers !== "[]") {
             const parsedLayers: string[] = JSON.parse(rawLayers);
             if (Array.isArray(parsedLayers)) {
-                for (let i = 0; i < parsedLayers.length; i++) {
-                    const layerUrl = parsedLayers[i];
+                for (const layerUrl of parsedLayers) {
                     if (typeof layerUrl === "string" && layerUrl.trim().length > 0) {
                         try {
-                            const overlay = L.imageOverlay(layerUrl, bounds);
-                            overlays[`Layer ${i + 1}`] = overlay;
-                            overlay.addTo(mapItem);
+                            const name = getLayerName(layerUrl);
+                            baseLayers[name] = L.imageOverlay(layerUrl, bounds);
                         } catch (e) {
                             console.error("[leaflet-map] Failed to add layer:", layerUrl, e);
                         }
@@ -655,8 +663,10 @@ async function initialiseMap(
         console.error("[leaflet-map] Failed to parse layers:", dataset.layers, e);
     }
 
-    if (Object.keys(overlays).length > 0) {
-        L.control.layers({ "Base map": baseLayer }, overlays).addTo(mapItem);
+    const layerNames = Object.keys(baseLayers);
+    if (layerNames.length > 0) {
+        // Leaflet's control.layers uses baseLayers (radio buttons) for mutual exclusivity
+        L.control.layers(baseLayers, {}).addTo(mapItem);
     }
 
     mapItem.fitBounds(bounds);
