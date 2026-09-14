@@ -641,10 +641,14 @@ async function initialiseMap(
             link.onclick = function (e: Event) {
                 e.preventDefault();
                 const container = map.getContainer();
-                if (container.requestFullscreen) container.requestFullscreen();
-                else if ((container as any).webkitRequestFullscreen) (container as any).webkitRequestFullscreen();
-                else if ((container as any).mozRequestFullScreen) (container as any).mozRequestFullScreen();
-                else if ((container as any).msRequestFullscreen) (container as any).msRequestFullscreen();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    if (container.requestFullscreen) container.requestFullscreen();
+                    else if ((container as any).webkitRequestFullscreen) (container as any).webkitRequestFullscreen();
+                    else if ((container as any).mozRequestFullScreen) (container as any).mozRequestFullScreen();
+                    else if ((container as any).msRequestFullscreen) (container as any).msRequestFullscreen();
+                }
             };
             containerEl.appendChild(link);
             return containerEl;
