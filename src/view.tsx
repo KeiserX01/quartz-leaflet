@@ -30,6 +30,20 @@ const toNumber = (value: unknown): number | undefined => {
 const getString = (value: unknown): string | undefined =>
     typeof value === "string" && value.trim().length > 0 ? value : undefined;
 
+/**
+ * Normaliza un path de asset a lowercase por segmentos.
+ *
+ * Quartz copia los assets de `content/` a `public/` en lowercase, pero
+ * `transformLink` de `bases-page` conserva el case original del path fuente
+ * (ej. `./Mapas/Venderian-state-labels.jpeg`). GitHub Pages sirve archivos
+ * de forma case-sensitive, así que un path con mayúsculas da 404.
+ *
+ * Al normalizar cada segmento a lowercase el path resultante coincide con
+ * el nombre real en `public/` sin necesidad de tocar el vault de Obsidian.
+ */
+const normalizeAssetPath = (p: string): string =>
+    p.split("/").map((segment) => segment.toLowerCase()).join("/");
+
 const leafletMapRenderer: ViewRenderer = ({
     entries,
     view,
@@ -46,10 +60,12 @@ const leafletMapRenderer: ViewRenderer = ({
         return <div>Leaflet map view requires an image.</div>;
     }
 
-    const imageSource = transformLink(slug as FullSlug, rawImage, {
-        strategy: linkResolution,
-        allSlugs: allSlugs as FullSlug[],
-    });
+    const imageSource = normalizeAssetPath(
+        transformLink(slug as FullSlug, rawImage, {
+            strategy: linkResolution,
+            allSlugs: allSlugs as FullSlug[],
+        }),
+    );
 
     const minZoom = toNumber(view.minZoom) ?? DEFAULTS.minZoom;
     const maxZoom = Math.max(toNumber(view.maxZoom) ?? DEFAULTS.maxZoom, minZoom);
@@ -65,10 +81,12 @@ const leafletMapRenderer: ViewRenderer = ({
             const layerStr = typeof layer === "string" ? layer.trim() : "";
             if (layerStr.length > 0) {
                 layers.push(
-                    transformLink(slug as FullSlug, layerStr, {
-                        strategy: linkResolution,
-                        allSlugs: allSlugs as FullSlug[],
-                    }),
+                    normalizeAssetPath(
+                        transformLink(slug as FullSlug, layerStr, {
+                            strategy: linkResolution,
+                            allSlugs: allSlugs as FullSlug[],
+                        }),
+                    ),
                 );
             }
         }

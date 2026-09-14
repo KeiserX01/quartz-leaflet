@@ -928,6 +928,7 @@ var toNumber = (value) => {
   return void 0;
 };
 var getString = (value) => typeof value === "string" && value.trim().length > 0 ? value : void 0;
+var normalizeAssetPath = (p) => p.split("/").map((segment) => segment.toLowerCase()).join("/");
 var leafletMapRenderer = ({
   entries,
   view,
@@ -942,10 +943,12 @@ var leafletMapRenderer = ({
   if (!rawImage) {
     return /* @__PURE__ */ jsx("div", { children: "Leaflet map view requires an image." });
   }
-  const imageSource = transformLink(slug, rawImage, {
-    strategy: linkResolution,
-    allSlugs
-  });
+  const imageSource = normalizeAssetPath(
+    transformLink(slug, rawImage, {
+      strategy: linkResolution,
+      allSlugs
+    })
+  );
   const minZoom = toNumber(view.minZoom) ?? DEFAULTS.minZoom;
   const maxZoom = Math.max(toNumber(view.maxZoom) ?? DEFAULTS.maxZoom, minZoom);
   const defaultZoom = Math.min(Math.max(toNumber(view.defaultZoom) ?? minZoom, minZoom), maxZoom);
@@ -960,10 +963,12 @@ var leafletMapRenderer = ({
       const layerStr = typeof layer === "string" ? layer.trim() : "";
       if (layerStr.length > 0) {
         layers.push(
-          transformLink(slug, layerStr, {
-            strategy: linkResolution,
-            allSlugs
-          })
+          normalizeAssetPath(
+            transformLink(slug, layerStr, {
+              strategy: linkResolution,
+              allSlugs
+            })
+          )
         );
       }
     }
