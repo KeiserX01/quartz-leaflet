@@ -628,6 +628,31 @@ async function initialiseMap(
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
+    // Independent fullscreen button (always visible)
+    const FullscreenBtn = L.Control.extend({
+        onAdd: function (map: Map): HTMLElement {
+            const btn = L.DomUtil.create("a", "leaflet-bar leaflet-control leaflet-control-fullscreen", L.DomUtil.create("div", "leaflet-bar-part", L.DomUtil.create("a", "leaflet-bar-part leaflet-bar-part-single", L.DomEvent.create("button", L.DomEvent.create("span", "", document.createElement("a"))))));
+            // Simplified: create button with icon
+            const link = document.createElement("a");
+            link.className = "leaflet-bar-part leaflet-bar-part-single";
+            link.href = "#";
+            link.title = "Fullscreen";
+            link.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#35271C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+            link.onclick = function (e: Event) {
+                e.preventDefault();
+                const container = map.getContainer();
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if ((container as any).webkitRequestFullscreen) (container as any).webkitRequestFullscreen();
+                else if ((container as any).mozRequestFullScreen) (container as any).mozRequestFullScreen();
+                else if ((container as any).msRequestFullscreen) (container as any).msRequestFullscreen();
+            };
+            btn.appendChild(link);
+            return btn;
+        },
+        onRemove: function (): void {}
+    });
+    new FullscreenBtn({ position: "topleft" }).addTo(mapItem);
+
     function getLayerName(url: string): string {
         try {
             const path = url.split("/").pop() || url;
