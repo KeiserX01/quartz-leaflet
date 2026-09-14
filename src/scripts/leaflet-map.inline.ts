@@ -660,7 +660,29 @@ async function initialiseMap(
     // Handle fullscreen exit (ESC or click) - force Leaflet to recalculate size
     const handleFullscreenChange = () => {
         if (!document.fullscreenElement) {
-            mapItem.invalidateSize();
+            const container = mapItem.getContainer();
+            // Restore ALL inline styles that fullscreen may have modified
+            container.style.position = "";
+            container.style.top = "";
+            container.style.left = "";
+            container.style.width = "";
+            container.style.height = dataset.height + "px";
+            container.style.zIndex = "";
+            container.style.border = "";
+            container.style.borderRadius = "";
+            // Force multiple reflows
+            void container.offsetWidth;
+            void container.offsetHeight;
+            // Invalidate Leaflet's internal size cache multiple times
+            requestAnimationFrame(() => {
+                mapItem.invalidateSize();
+                // Trigger a second invalidation after a short delay
+                setTimeout(() => {
+                    mapItem.invalidateSize();
+                    // Also dispatch resize for Quartz
+                    window.dispatchEvent(new Event("resize"));
+                }, 100);
+            });
         }
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
