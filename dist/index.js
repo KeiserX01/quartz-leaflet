@@ -555,8 +555,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 .leaflet-control-layers-toggle {
-  background-color: #2596be !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Cg fill='%232596be' stroke='%232596be' stroke-width='1.5'%3E%3Crect x='2' y='2' width='20' height='6' rx='1'/%3E%3Crect x='2' y='9' width='20' height='6' rx='1'/%3E%3Crect x='2' y='16' width='20' height='6' rx='1'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-color: #E8DCC2 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Cg fill='%2335271C' stroke='%2335271C' stroke-width='1.5'%3E%3Crect x='2' y='2' width='20' height='6' rx='1'/%3E%3Crect x='2' y='9' width='20' height='6' rx='1'/%3E%3Crect x='2' y='16' width='20' height='6' rx='1'/%3E%3C/g%3E%3C/svg%3E") !important;
   background-size: 18px 18px;
   background-repeat: no-repeat;
   background-position: center;
