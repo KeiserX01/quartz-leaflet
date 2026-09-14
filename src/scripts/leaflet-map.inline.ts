@@ -657,6 +657,17 @@ async function initialiseMap(
     });
     new FullscreenBtn({ position: "topleft" }).addTo(mapItem);
 
+    // Handle fullscreen exit (ESC or click) - force Leaflet to recalculate size
+    const handleFullscreenChange = () => {
+        if (!document.fullscreenElement) {
+            mapItem.invalidateSize();
+        }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    // Store reference for cleanup
+    (mapItem as any).__fullscreenListener = handleFullscreenChange;
+
     function getLayerName(url: string): string {
         try {
             const path = url.split("/").pop() || url;
@@ -706,8 +717,15 @@ async function initialiseMap(
 }
 
 function cleanupMap(mapItem: Map | undefined) {
-    mapItem?.clearAllEventListeners();
-    mapItem?.remove();
+    if (!mapItem) return;
+    // Remove fullscreen listener if present
+    const listener = (mapItem as any).__fullscreenListener;
+    if (listener) {
+        document.removeEventListener("fullscreenchange", listener);
+        delete (mapItem as any).__fullscreenListener;
+    }
+    mapItem.clearAllEventListeners();
+    mapItem.remove();
 }
 
 async function initializeLeafletMaps() {
