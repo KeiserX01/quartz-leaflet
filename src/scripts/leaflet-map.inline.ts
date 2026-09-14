@@ -631,8 +631,8 @@ async function initialiseMap(
     // Independent fullscreen button (always visible)
     const FullscreenBtn = L.Control.extend({
         onAdd: function (map: Map): HTMLElement {
-            const btn = L.DomUtil.create("a", "leaflet-bar leaflet-control leaflet-control-fullscreen", L.DomUtil.create("div", "leaflet-bar-part", L.DomUtil.create("a", "leaflet-bar-part leaflet-bar-part-single", L.DomEvent.create("button", L.DomEvent.create("span", "", document.createElement("a"))))));
-            // Simplified: create button with icon
+            const containerEl = document.createElement("div");
+            containerEl.className = "leaflet-bar leaflet-control leaflet-control-fullscreen";
             const link = document.createElement("a");
             link.className = "leaflet-bar-part leaflet-bar-part-single";
             link.href = "#";
@@ -646,8 +646,8 @@ async function initialiseMap(
                 else if ((container as any).mozRequestFullScreen) (container as any).mozRequestFullScreen();
                 else if ((container as any).msRequestFullscreen) (container as any).msRequestFullscreen();
             };
-            btn.appendChild(link);
-            return btn;
+            containerEl.appendChild(link);
+            return containerEl;
         },
         onRemove: function (): void {}
     });
