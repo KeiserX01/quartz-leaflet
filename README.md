@@ -69,18 +69,43 @@ views:
 ```
 ````
 
-| Setting     | What it does                                                                                              |
-| ----------- | --------------------------------------------------------------------------------------------------------- |
-| type        | The type of base, don't change this (from Obsidian bases)                                                 |
-| name        | What the view is called (from Obsidian bases)                                                             |
-| image       | The image the map should show. It also accepts wiki links. Can be any image supported by Quartz           |
-| mapName     | Optional identifier for the map. Useful if you want to reuse a note across several maps                   |
-| defaultZoom | The zoom value the map opens with. Defaults to `minZoom`                                                  |
-| minZoom     | How far you can zoom out. Defaults to 0. This value is allowed to be a decimal number and can be negative |
-| maxZoom     | How far you can zoom in. Defaults to 2. This value is allowed to be a decimal number and can be negative  |
-| zoomDelta   | How granular zooming is. This value is allowed to be a decimal number.                                    |
-| scale       | How much to scale the result of the measure tool. This value is allowed to be a decimal number            |
-| unit        | The unit the measure tool uses (think km, mi, hours)                                                      |
+**Example with SVG map (requires explicit dimensions):**
+
+````markdown
+```base
+views:
+  - type: leaflet-map
+    name: Map
+    mapName: my-world
+    image: assets/world-map.svg
+    height: 500
+    minZoom: -1
+    maxZoom: 3
+    defaultZoom: -1
+    zoomDelta: 0.25
+    scale: "0.5"
+    unit: km
+    imageWidth: 2000
+    imageHeight: 1500
+    imageType: svg
+```
+````
+
+| Setting       | What it does                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------- |
+| type          | The type of base, don't change this (from Obsidian bases)                                                 |
+| name          | What the view is called (from Obsidian bases)                                                             |
+| image         | The image the map should show. It also accepts wiki links. Can be any image supported by Quartz           |
+| mapName       | Optional identifier for the map. Useful if you want to reuse a note across several maps                   |
+| defaultZoom   | The zoom value the map opens with. Defaults to `minZoom`                                                  |
+| minZoom       | How far you can zoom out. Defaults to 0. This value is allowed to be a decimal number and can be negative |
+| maxZoom       | How far you can zoom in. Defaults to 2. This value is allowed to be a decimal number and can be negative  |
+| zoomDelta     | How granular zooming is. This value is allowed to be a decimal number.                                    |
+| scale         | How much to scale the result of the measure tool. This value is allowed to be a decimal number            |
+| unit          | The unit the measure tool uses (think km, mi, hours)                                                      |
+| imageWidth    | **Optional.** Explicit image width in pixels. Required for SVG maps to establish correct coordinate system. |
+| imageHeight   | **Optional.** Explicit image height in pixels. Required for SVG maps to establish correct coordinate system. |
+| imageType     | **Optional.** Force image type: `"auto"` (default, detects by extension), `"raster"`, or `"svg"`.         |
 
 > Technically only `type`, `name`, and `image` are required for the map view to work. However you'll likely end up using most of the other settings.
 

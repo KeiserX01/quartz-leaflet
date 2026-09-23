@@ -1,3 +1,5 @@
+export type ImageTypeStrategy = 'auto' | 'raster' | 'svg';
+
 export interface LeafletMapViewConfig {
     mapName?: string;
     image: string;
@@ -10,6 +12,10 @@ export interface LeafletMapViewConfig {
     unit?: string;
     layers?: string[];
     fullscreen?: boolean;
+    // SVG/raster override fields (optional, for explicit control)
+    imageWidth?: number;
+    imageHeight?: number;
+    imageType?: ImageTypeStrategy;
 }
 
 export interface LeafletMapPluginOptions {

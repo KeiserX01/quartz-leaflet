@@ -43,6 +43,10 @@ interface MapDataSet {
     enableCopyTool: string;
     enableFullscreen: string;
     layers?: string;
+    // New SVG/raster override fields
+    imageWidth?: string;
+    imageHeight?: string;
+    imageType?: string;
 }
 
 const C = {
@@ -584,13 +588,43 @@ function isMapDataSet(dataset: unknown): dataset is MapDataSet {
     return true;
 }
 
-async function getImageMeta(url: string): Promise<HTMLImageElement> {
+interface ImageMeta {
+    width: number;
+    height: number;
+    type: 'raster' | 'svg';
+}
+
+async function getImageMeta(url: string, hints?: { width?: number; height?: number; type?: string }): Promise<ImageMeta> {
+    // If explicit hints provided, use them (bypasses image loading for dimensions)
+    if (hints?.width && hints?.height) {
+        const detectedType = (hints.type === 'svg' || hints.type === 'raster' ? hints.type : detectImageType(url));
+        return { width: hints.width, height: hints.height, type: detectedType };
+    }
+
+    // Fallback: load image and detect
     return new Promise((resolve, reject) => {
         const image = new Image();
-        image.onload = () => resolve(image);
+        image.onload = () => {
+            const detectedType = detectImageType(url);
+            // For SVG loaded via <img>, naturalWidth/naturalHeight may be 0 or viewport size
+            // If they're suspicious, we'll handle in initialiseMap
+            resolve({
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+                type: detectedType,
+            });
+        };
         image.onerror = (error) => reject(error);
         image.src = url;
     });
+}
+
+function detectImageType(url: string): 'raster' | 'svg' {
+    const lower = url.toLowerCase();
+    if (lower.endsWith('.svg') || lower.includes('.svg?') || lower.includes('.svg#')) {
+        return 'svg';
+    }
+    return 'raster';
 }
 
 async function initialiseMap(
@@ -602,13 +636,30 @@ async function initialiseMap(
         return;
     }
 
-    const image = await getImageMeta(dataset.src);
+    // Extract hints from data attributes (set by view.tsx)
+    const hints = {
+        width: dataset.imageWidth ? parseFloat(dataset.imageWidth) : undefined,
+        height: dataset.imageHeight ? parseFloat(dataset.imageHeight) : undefined,
+        type: dataset.imageType === 'raster' || dataset.imageType === 'svg' ? dataset.imageType : undefined,
+    };
 
-    mapElement.style.aspectRatio = (image.naturalWidth / image.naturalHeight).toString();
+    const image = await getImageMeta(dataset.src, hints);
+
+    // Validate dimensions - if hints provided but invalid, or if SVG loaded via <img> gave 0/0
+    const isSvg = image.type === 'svg';
+    const hasValidDimensions = image.width > 0 && image.height > 0 && isFinite(image.width) && isFinite(image.height);
+    
+    if (!hasValidDimensions) {
+        console.error('[leaflet-map] Invalid image dimensions:', { width: image.width, height: image.height, type: image.type, src: dataset.src });
+        mapElement.textContent = 'Failed to load map: could not determine image dimensions. For SVG, provide imageWidth and imageHeight in the base config.';
+        return;
+    }
+
+    mapElement.style.aspectRatio = (image.width / image.height).toString();
 
     const bounds: LatLngBoundsExpression = [
         [0, 0],
-        [image.naturalHeight, image.naturalWidth],
+        [image.height, image.width],
     ];
 
     const mapItem = L.map(mapElement, {

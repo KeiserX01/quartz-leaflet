@@ -1,5 +1,6 @@
 import { ViewTypeRegistration } from '@quartz-community/bases-page';
 
+type ImageTypeStrategy = 'auto' | 'raster' | 'svg';
 interface LeafletMapViewConfig {
     mapName?: string;
     image: string;
@@ -12,6 +13,9 @@ interface LeafletMapViewConfig {
     unit?: string;
     layers?: string[];
     fullscreen?: boolean;
+    imageWidth?: number;
+    imageHeight?: number;
+    imageType?: ImageTypeStrategy;
 }
 interface LeafletMapPluginOptions {
     enableCopyTool?: boolean;

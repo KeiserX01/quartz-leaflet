@@ -92,6 +92,11 @@ const leafletMapRenderer: ViewRenderer = ({
         }
     }
     const fullscreenEnabled = view.fullscreen === true || view.fullscreen === "true";
+    
+    // New SVG/raster override fields
+    const imageWidth = toNumber(view.imageWidth);
+    const imageHeight = toNumber(view.imageHeight);
+    const imageType = getString(view.imageType) ?? "auto";
 
     const markers: MarkerWithEntry[] = [];
     for (const entry of entries) {
@@ -138,6 +143,9 @@ const leafletMapRenderer: ViewRenderer = ({
                 data-enable-copy-tool={pluginOptions.enableCopyTool ?? false}
                 data-enable-fullscreen={fullscreenEnabled ? "true" : "false"}
                 data-layers={layers.length > 0 ? JSON.stringify(layers) : undefined}
+                data-image-width={imageWidth}
+                data-image-height={imageHeight}
+                data-image-type={imageType}
             >
                 {filteredMarkers.map((marker) => (
                     <div
